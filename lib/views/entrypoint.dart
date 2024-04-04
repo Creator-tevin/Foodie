@@ -7,61 +7,79 @@ import 'package:foodie/views/cart/cart_page.dart';
 import 'package:foodie/views/search/search_page.dart';
 import 'package:foodie/views/profile/profile_page.dart';
 import 'package:foodie/controllers/tab_index_controller.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:badges/badges.dart' as badges;
 
 class MainScreen extends StatelessWidget {
-   MainScreen({super.key});
+  MainScreen({super.key});
 
   List<Widget> pageList = const [
     HomePage(),
     SearchPage(),
     CartPage(),
     ProfilePage(),
-
   ];
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(TabIndexController());
-    return  Obx(() =>  Scaffold(
-      body: Stack(
-        children: [
-          pageList[ controller.tabIndex],
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Theme(data: Theme.of(context).copyWith(canvasColor: kPrimary),
-                child: BottomNavigationBar(
-                  showSelectedLabels: false,
-                  showUnselectedLabels: false,
-                  unselectedIconTheme: const IconThemeData(color: Colors.black38),
-                  selectedIconTheme: const IconThemeData(color: kSecondary),
-                  onTap: (value) {
-                    controller.setTabIndex = value;
-                  },
-                  currentIndex: controller.tabIndex,
-                  items:   [
-                    BottomNavigationBarItem(
-                        icon: controller.tabIndex ==0
-                            ? const Icon(AntDesign.appstore1 )
-                            : const Icon(AntDesign.appstore_o),
-                        label: 'Home'),
-                    const BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+    return Obx(() => Scaffold(
+          body: Stack(
+            children: [
+              pageList[controller.tabIndex],
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Theme(
+                  data: Theme.of(context).copyWith(canvasColor: kPrimary),
+                  child: CurvedNavigationBar(
+                    color: kPrimary,
+                    backgroundColor: Colors.white,
+                    buttonBackgroundColor: Colors.transparent,
+                    onTap: (value) {
+                      controller.setTabIndex = value;
+                    },
+                    height: 50,
+                    animationDuration: Duration(milliseconds: 200),
+                    animationCurve: Curves.easeInOut,
+                    index: controller.tabIndex,
+                    items: [
+                      _buildIcon(controller, AntDesign.appstore1,
+                          AntDesign.appstore_o, 'Home', 0),
+                      _buildIcon(
+                          controller, Icons.search, Icons.search, 'Search', 1),
+                      _buildCartIcon(
+                          controller, FontAwesome.opencart, 'Cart', 2),
+                      _buildIcon(controller, FontAwesome.user_circle,
+                          FontAwesome.user_circle_o, 'Profile', 3),
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
+        ));
+  }
+}
 
-                   const BottomNavigationBarItem(
-                          icon: Badge(
-                            label: Text('1'),
-                              child: Icon(FontAwesome.opencart)),
-                         label: 'Cart'),
+Widget _buildIcon(TabIndexController controller, IconData selectedIcon,
+    IconData unselectedIcon, String tooltip, int index) {
+  return Icon(
+    controller.tabIndex == index ? selectedIcon : unselectedIcon,
+    color: controller.tabIndex == index ? kSecondary : Colors.black38,
+    size: 20,
+    semanticLabel: tooltip,
+  );
+}
 
-                    BottomNavigationBarItem(
-                      icon: controller.tabIndex == 3
-                          ?  const Icon(FontAwesome.user_circle)
-                     : const Icon (FontAwesome.user_circle_o),
-                      label: 'Profile'),
-                  ],
-                )),
-          )
-        ],
-      ),
-    ));
-    }
+Widget _buildCartIcon(
+    TabIndexController controller, IconData icon, String tooltip, int index) {
+  return badges.Badge(
+    badgeContent: Text('1'),
+    child: Icon(
+      icon,
+      color: controller.tabIndex == index ? kSecondary : Colors.black38,
+      size: 20,
+      semanticLabel: tooltip,
+    ),
+  );
 }
